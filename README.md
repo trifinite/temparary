@@ -9,11 +9,11 @@ Only use this tool on Tesla vehicles and smartphones you own or have permission 
 
 ## Usage
 
-* use the bluez-tool `bdaddri` in order to set your Bluetooth interface to the addreesss of your vehicle. The Android app is capable of determining the MAC address of your vehicle and only will connect if this is correct.
+* use the bluez-tool `bdaddr` in order to set your Bluetooth interface to the addreesss of your vehicle. The Android app is capable of determining the MAC address of your vehicle and only will connect if this is correct.
 
 * make sure to stop and/or disable your system's bluetoothd process, as it interferes with temparary's BLE advertisement
 
-* copy the `exapmle-vehicle.json` file and adjust the values to the ones that the vehicle that is going to be impersonated is using.
+* copy the `exapmle_vehicle.json` file and adjust the values to the ones that the vehicle that is going to be impersonated is using.
 
 ### Key drop attack
 
