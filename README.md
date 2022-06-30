@@ -19,7 +19,7 @@ Only use this tool on Tesla vehicles and smartphones you own or have permission 
 
 * wait for the smart phone app to connect to your temparary session.
 
-* toggle the evil bit by entereing 'e' followed by the return key
+* toggle the evil bit by entering 'e' followed by the return key
 
 * request an authorization by entering 'a' followed by the return key
 
