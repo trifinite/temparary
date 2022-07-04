@@ -30,7 +30,7 @@ if (len(configfile)<4):
 
 config = {
     "eir": "0201061aff4c00021574278bdab64445208f0c720eaf05993500002342c5", 
-    "response": "030222111309536233313764363338666563393432646143", 
+    "response": "030222111309533066373838356332616631613665663943", 
     "pubkeyResponse": "0025"
 }
 
@@ -38,14 +38,12 @@ with open(configfile, 'r') as f:
     config = json.load(f)
 
 bleno = Bleno()
-name = 'Sb317d638fec942daC'
+name = 'S0f7885c2af1a6ef9C'
 vehicleUuid = "74278BDAB64445208F0C720EAF059935"
 tesla = Tesla(config)
 teslaService = TeslaService(tesla)
-EIRData = '0201061aff4c00021574278bdab64445208f0c720eaf05993500002539c5'
-eir = bytearray.fromhex(EIRData) 
-ResponseData = '030222111309536233313764363338666563393432646143'
-scanResponse = bytearray.fromhex(ResponseData)
+eir = bytearray.fromhex(config['eir']) 
+scanResponse = bytearray.fromhex(config['response'])
 
 
 def onStateChange(state):

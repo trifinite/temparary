@@ -1,9 +1,5 @@
 from pybleno import *
 import array
-import struct
-import sys
-import traceback
-from builtins import str
 from Tesla import *
 
 class VersionInfoCharacteristic(Characteristic):
@@ -38,9 +34,4 @@ class VersionInfoCharacteristic(Characteristic):
         elif len(data) != 1:
             callback(Characteristic.RESULT_INVALID_ATTRIBUTE_LENGTH)
         else:
-            crust = readUInt8(data, 0)
-            if crust == PizzaCrust['NORMAL'] or crust == PizzaCrust['DEEP_DISH'] or crust == PizzaCrust['THIN']:
-                self.tesla.crust = crust
-                callback(Characteristic.RESULT_SUCCESS);
-            else:
-                callback(Characteristic.RESULT_UNLIKELY_ERROR);
+            pass
