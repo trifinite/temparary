@@ -22,14 +22,14 @@ class FromVehicleCharacteristic(Characteristic):
         self._updateValueCallback = None
             
     def watchMessage(self):
-        sleep(0.2)
+        sleep(0.5)
         if (len(self.tesla.messagelist)>0):
             try:
                 msg = self.tesla.messagelist.pop(0)
                 self._updateValueCallback(msg)
                 print(bcolors.OKGREEN+"Sent Message:\n"+getOutputStringFV(msg,self.tesla.human)+bcolors.ENDC)
-            except:
-                print('...')
+            except Exception as e:
+                print('... '+str(e))
 
         if threading.main_thread().isAlive():
             threading.Thread(None,self.watchMessage).start()

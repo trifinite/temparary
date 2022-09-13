@@ -1,4 +1,4 @@
-<a href="https://trifinite.org/stuff/tempara/" target="_blank"><img align="right" src="/images/temparary_logo.png"/></a>
+<a href="https://trifinite.org/stuff/tool_temparary/" target="_blank"><img align="right" src="/images/temparary_logo.png"/></a>
 
 # temparary - Emulate the BLE interface of Tesla Vehicles
 

