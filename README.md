@@ -29,7 +29,9 @@ Install all the reqiuired python requiremets: (install packages as root)
 ## Usage
 Since the used pybleno library (https://github.com/Adam-Langley/pybleno) is not getting along well with the default bluetooth service on many linux systems, please make sure to stop the bluetooth service (in case it is started by default). Also, the pybleno library is directly talking to the HCI interface and therefore needs certain permissions. Therefore, these commands require root privileges.
 
-Before you start, edit your copy of the temparary.py script and adjust 
+Before you start, edit your copy of the temparary.py script and adjust the locations of the binaries
+BDADDR_BIN='/usr/local/src/bluez-5.64/tools/bdaddr' <- this is most likely not the location of the bdaddr binary on your system
+HCICONFIG_BIN='/usr/local/bin/hciconfig' <- this is most likely not the location of the hciconfig binary on your system
 
 This works for Ubuntu:
 ```
@@ -40,7 +42,6 @@ Next to the victim smartphone run: (as root)
 ```
 #> python3 temparary.py <name of profile.json>
 ```
-
 
 * use the bluez-tool `bdaddr` in order to set your Bluetooth interface to the addreesss of your vehicle. The Android app is capable of determining the MAC address of your vehicle and only will connect if this is correct.
 * make sure to stop and/or disable your system's bluetoothd process, as it interferes with temparary's BLE advertisement
@@ -58,9 +59,9 @@ Next to the victim smartphone run: (as root)
 * toggle the phone bit by entering 'p' followed by the return key until the right phone type is displayed (Adndroid or iPhone)
 * toggle the cryptocounter bit by entering 'c' followed by the return key
 * request an authorization response by entering 'a' followed by the return key
-* see how the message id is now 
+* see how the message id is now 4294967293 (iPhone) or 2147483645 (Android)
+* maybe combine this attack with the keydrop attack by hiiting 'c'-return-key, 'k'-return key and 'a'-return key
 * exit the application by entering 'q' followed by the return key
-
 
 ## Disclaimer
 Only use this tool on Tesla vehicles and smartphones you own or have permission to do so!
